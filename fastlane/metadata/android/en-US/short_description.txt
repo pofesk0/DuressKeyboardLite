@@ -1,1 +1,1 @@
-Keyboard with DuressPassword function.
+Keyboard with DuressPassword feature.
