@@ -4,7 +4,7 @@ id 'com.android.application'
 }
 
 android {
-namespace "duress.keyboard"
+namespace "duress.keyboard.lite"
 compileSdk 29
 
 lint {
@@ -12,11 +12,11 @@ lint {
     }
 
 defaultConfig {  
-    applicationId "duress.keyboard"  
+    applicationId "duress.keyboard.lite"  
     minSdk 29
-    targetSdk 33
-    versionCode 47
-    versionName "4.7"  
+    targetSdk 36
+    versionCode 1
+    versionName "1.0"  
 }  
 
 buildTypes {  
