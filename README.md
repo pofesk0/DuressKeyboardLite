@@ -1,4 +1,4 @@
-EN: This app is a simplified version of DuressKeyboard app. This app has higher target SDK (because it uses another mechanism for wipe data), but fewer features.
+EN: This app is a simplified version of DuressKeyboard app. This app has higher target SDK (because it uses another mechanism to wipe data), but fewer features.
 
 This is keyboard to prepare for emergency situations. When used, it can erase data (reset the phone settings) when you enter a special code (that you set your in advance.). Reset code works only on the lock screen. It help if in the future someone tries to force you to enter a password. In that case, you enter the reset code instead password and press the Enter arrow (⏎).
 
