@@ -1,2 +1,7 @@
-Keyboard that reacts to triggers and performs security actions.
-We don't collect any of your input, the app just reacts to trigger commands.
+Keyboard with Duress Password feature.
+
+This keyboard is private, local and doesn't collect your input.
+
+Duress Password feature — the ability to wipe phone data by entering a special code right on the lock screen. This feature is available in phones where third-party keyboards can work on the lock screen. 
+
+This app is a simplified version of DuressKeyboard app. This app has higher target SDK, but fewer features.
