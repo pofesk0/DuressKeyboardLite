@@ -22,15 +22,13 @@ import org.json.*;
 public class MainActivity extends Activity {
 
 
-	private android.app.AlertDialog accessibilityDialog;
+	
 	private static boolean main=true;
 	boolean accessibilityEnabled = false;
     private static final String PREFS_NAME = "SimpleKeyboardPrefs";
     private static final String KEY_CUSTOM_COMMAND = "custom_wipe_command";
 	private BroadcastReceiver screenOffReceiver;
-	private SharedPreferences prefsNetwork;
 	
-	private Switch noNetworkWipeSwitch;
 	private static final String KEY_LAYOUT_RU = "layout_ru";
     private static final String KEY_LAYOUT_EN = "layout_en";
     private static final String KEY_LAYOUT_SYM = "layout_sym";
