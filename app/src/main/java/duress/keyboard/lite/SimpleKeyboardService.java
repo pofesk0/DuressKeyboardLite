@@ -353,9 +353,7 @@ public class SimpleKeyboardService extends InputMethodService {
 							
 							 
 							
-							else {
-									
-								}
+							
 								
 						}}
 					}
