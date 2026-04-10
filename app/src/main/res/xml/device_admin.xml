@@ -3,6 +3,5 @@
     <uses-policies>
         <wipe-data />
         <watch-login/>
-        <force-lock />
     </uses-policies>
 </device-admin>
