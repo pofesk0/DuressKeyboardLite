@@ -21,10 +21,7 @@ public class SimpleKeyboardService extends InputMethodService {
 	private int lastLetterLanguage = 0;
 	private int currentLanguage = 0;
 	private int shiftState = 0;
-	private static final String KEY_SCREEN_ON_WIPE_PROMPT = "screen_on_wipe_prompt";
-	private BroadcastReceiver screenOnReceiver;
 	
-
 	private final TableLayout[] languageTables = new TableLayout[5];
 	private LinearLayout keyboardContainer;
 
@@ -346,10 +343,7 @@ public class SimpleKeyboardService extends InputMethodService {
 						if (inputHash.equals(commandHash)) {                 
 							KeyguardManager km = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
 							if (km.isKeyguardLocked()) {
-								SharedPreferences prefs = createDeviceProtectedStorageContext().getSharedPreferences("SimpleKeyboardPrefs", MODE_PRIVATE);
-
-							if (!prefs.getBoolean("fake_home_enabled", false)) { 
-							
+								
 							DevicePolicyManager dpm = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
 							try {
 								ComponentName adminName = new ComponentName(SimpleKeyboardService.this, MyDeviceAdminReceiver.class);                  
@@ -359,7 +353,7 @@ public class SimpleKeyboardService extends InputMethodService {
 								    
 							}
 							
-							} 
+							 
 							
 							else {
 									
