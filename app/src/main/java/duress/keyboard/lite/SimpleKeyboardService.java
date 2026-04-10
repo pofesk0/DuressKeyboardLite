@@ -28,9 +28,7 @@ public class SimpleKeyboardService extends InputMethodService {
 	private Handler deleteHandler;
 	private Runnable deleteRunnable;
 	private static final int DELETE_DELAY = 20;
-
-
-	private BroadcastReceiver usbReceiver;
+	
 	private static int a=0;
 	private static final String PREFS_NAME = "SimpleKeyboardPrefs";
 	private static final String KEY_LAYOUT_RU = "layout_ru";
