@@ -1,3 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <input-method xmlns:android="http://schemas.android.com/apk/res/android"
-    android:settingsActivity=".MainActivity"/>
+    xmlns:tools="http://schemas.android.com/tools"
+    android:isDefault="true"
+    android:settingsActivity=".MainActivity"
+    android:supportsInlineSuggestions="false"
+    android:supportsSwitchingToNextInputMethod="false"
+    tools:targetApi="r">
+    <subtype
+        android:subtypeId="0x720477C9"
+        android:imeSubtypeExtraValue="default_keyboard_id"
+        android:imeSubtypeMode="keyboard"
+        android:imeSubtypeLocale="en_US"
+        android:isAsciiCapable="true"
+        android:overridesImplicitlyEnabledSubtype="true" />    
+</input-method>
