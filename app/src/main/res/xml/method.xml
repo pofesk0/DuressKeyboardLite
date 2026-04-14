@@ -2,8 +2,7 @@
 <input-method xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:isDefault="true"
-    android:settingsActivity=".MainActivity"
-    android:supportsInlineSuggestions="false"
+    android:settingsActivity=".MainActivity"    
     android:supportsSwitchingToNextInputMethod="false"
     tools:targetApi="r">
     <subtype
