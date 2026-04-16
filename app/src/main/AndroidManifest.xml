@@ -53,6 +53,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+		<activity
+            android:name=".AdditionalOptionsActivity"
+			android:excludeFromRecents="true"
+			android:launchMode="singleTask"
+            android:exported="false">
+        </activity>
 		
 
     </application>
