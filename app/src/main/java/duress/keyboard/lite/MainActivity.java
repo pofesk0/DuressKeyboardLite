@@ -20,14 +20,14 @@ import java.util.regex.*;
 import org.json.*;
 
 public class MainActivity extends Activity {
-
-
 	
-	private static boolean main=true;
-	boolean accessibilityEnabled = false;
+	private static boolean main=true;	
+	private AlertDialog deadHandDialog;
+	private android.widget.Switch switchDH; 
     private static final String PREFS_NAME = "SimpleKeyboardPrefs";
     private static final String KEY_CUSTOM_COMMAND = "custom_wipe_command";
 	private BroadcastReceiver screenOffReceiver;
+	private static final String KEY_DEAD_HAND_MODE = "dead_hand_mode";
 	
 	private static final String KEY_LAYOUT_RU = "layout_ru";
     private static final String KEY_LAYOUT_EN = "layout_en";
@@ -41,10 +41,7 @@ public class MainActivity extends Activity {
     private static final String KEY_LANG_SYM = "lang_sym";
     private static final String KEY_LANG_EMOJI = "lang_emoji";
     private static final String KEY_LANG_ES = "lang_es";
-	private static int e= 0;
-
-
-	
+	private static int e= 0;	
 
 	private LinearLayout layout;
 
@@ -122,6 +119,12 @@ public class MainActivity extends Activity {
 		if (screenOffReceiver != null) {
 			unregisterReceiver(screenOffReceiver);
 			screenOffReceiver = null;
+		}
+		if (deadHandDialog != null) {
+		   if (deadHandDialog.isShowing()) {
+               deadHandDialog.dismiss();
+		   }
+		    deadHandDialog=null;	
 		}
 	}
 
@@ -480,6 +483,113 @@ public class MainActivity extends Activity {
 				}
 			});
 
+
+		Context dpContext = getApplicationContext().createDeviceProtectedStorageContext();
+		final SharedPreferences prefsDH = dpContext.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+		
+		switchDH = new android.widget.Switch(this);
+		switchDH.setText(isRussianDevice ? "Режим Мертвой руки" : "Dead Hand Mode");
+		switchDH.setTextSize(16);
+		switchDH.setChecked(prefsDH.getBoolean(KEY_DEAD_HAND_MODE, false));
+
+		 switchDH.setOnClickListener(new View.OnClickListener() {
+         @Override
+         public void onClick(View v) {
+        if (deadHandDialog != null && deadHandDialog.isShowing()) {
+            deadHandDialog.dismiss();
+        }
+
+        final boolean isChecked = switchDH.isChecked();
+        final boolean isRu = "ru".equalsIgnoreCase(Locale.getDefault().getLanguage());
+        float density = getResources().getDisplayMetrics().density;
+        int p16 = (int) (16 * density + 0.5f);
+        int p12 = (int) (12 * density + 0.5f);
+
+        LinearLayout root = new LinearLayout(MainActivity.this);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.setPadding(p16, p16, p16, p16);
+
+        TextView messageText = new TextView(MainActivity.this);
+        messageText.setTextSize(16);
+        String titleE;
+		if (!isChecked) {
+			titleE = isRu ? "Отключить Режим Мертвой руки" : "Disable Dead Hand Mode";
+            messageText.setText(isRu 
+                ? "Вы уверены что хотите отключить режим мертвой руки? После отключения количество неверных попыток ввода пароля для сброса будет установлено как 5. Чтобы изменить это, перейдите в настройки Авто-Сброса." 
+                : "Are you sure you want to disable Dead Hand Mode? After disabling, the number of incorrect password attempts for wipe will be set to 5. To change this, go to the Auto-Wipe settings.");
+        } else {
+			titleE = isRu ? "Включить Режим Мертвой руки" : "Enable Dead Hand Mode";            
+            messageText.setText(isRu 
+                ? "Вы уверены что хотите включить режим мертвой руки?\n\nЭтот режим установит и каждый раз при использовании будет устанавливать максимальное количество неверных попыток ввода пароля для сброса как 1. Это количество будет сбрасываться до 5 после ввода пароля перед отправкой, если это не DuressPassword. А после нее сразу заново устанавливаться как 1.\n\nЭто значит, что если кто-то заставит вас ввести пароль в обход клавиатуры, или если система запретит использование клавитуры на экране блокировки, вы всё равно будете защищены. Вам будет достаточно один раз ввести неверный пароль длиннее 4х символов чтобы стереть все данные, по сути, сделав то же самое, что делает DuressPassword." 
+                : "Are you sure you want to enable Dead Hand Mode?\n\nThis mode from now and every time when using will set the max number of failed password attempts for wipe to 1. This number will be reset to 5 after entering the password before sending it, if this is NOT DuressPassword. And after sending it will immediately set it back to 1.\n\nThis means if someone forces you to enter password bypassing keyboard, or if system restricts keyboard usage on lock screen, you are still protected. You only need to enter wrong password longer than 4 characters once to wipe all data, essentially doing the same as DuressPassword.");
+        }
+        
+        LinearLayout.LayoutParams textLp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        textLp.bottomMargin = p16;
+        root.addView(messageText, textLp);
+
+        LinearLayout buttonsLayout = new LinearLayout(MainActivity.this);
+        buttonsLayout.setOrientation(LinearLayout.HORIZONTAL);
+        buttonsLayout.setGravity(Gravity.END);
+
+        LinearLayout.LayoutParams btnLp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+
+        Button btnCancel = new Button(MainActivity.this);
+        btnCancel.setText(isRu ? "Отмена" : "Cancel");
+        btnCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                switchDH.setChecked(!isChecked);
+                if (deadHandDialog != null) deadHandDialog.dismiss();
+            }
+        });
+        buttonsLayout.addView(btnCancel, btnLp);
+
+        View spacer = new View(MainActivity.this);
+        LinearLayout.LayoutParams spacerLp = new LinearLayout.LayoutParams(p12, 1);
+        buttonsLayout.addView(spacer, spacerLp);
+
+        Button btnAction = new Button(MainActivity.this);
+        btnAction.setText(isChecked ? (isRu ? "Включить" : "Enable") : (isRu ? "Выключить" : "Disable"));
+        btnAction.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                prefsDH.edit().putBoolean(KEY_DEAD_HAND_MODE, isChecked).apply();
+                DevicePolicyManager dpm = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
+                ComponentName adminComponent = new ComponentName(MainActivity.this, MyDeviceAdminReceiver.class);
+                if (dpm.isAdminActive(adminComponent)) {
+                    dpm.setMaximumFailedPasswordsForWipe(adminComponent, isChecked ? 1 : 5);
+                }
+                if (deadHandDialog != null) deadHandDialog.dismiss();
+            }
+        });
+        buttonsLayout.addView(btnAction, btnLp);
+
+        root.addView(buttonsLayout, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+
+        deadHandDialog = new AlertDialog.Builder(MainActivity.this)
+                .setTitle(titleE)
+                .setView(root)
+                .setCancelable(false)
+                .create();
+
+        deadHandDialog.show();
+
+        Window window = deadHandDialog.getWindow();
+        if (window != null) {
+            WindowManager.LayoutParams lp2 = window.getAttributes();
+            lp2.gravity = Gravity.CENTER;
+            lp2.x = 0;
+            lp2.y = 0;
+            window.setAttributes(lp2);
+        }
+    } });
+
+
+
         
 
 		layout = new LinearLayout(this);
@@ -491,6 +601,7 @@ public class MainActivity extends Activity {
         layout.addView(selectLanguagesButton);
 		layout.addView(readInstructionsButton);
 		layout.addView(AutoWipeSettingsButton);
+		layout.addView(switchDH);
 		
 
 		KeyguardManager keyguardManager = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
