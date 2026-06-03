@@ -44,8 +44,8 @@ public class SimpleKeyboardService extends InputMethodService {
 	private static final String KEY_LANG_EMOJI = "lang_emoji";
 	private static final String KEY_LANG_ES = "lang_es";
 
-	private final Handler pollingHandler = new Handler(Looper.getMainLooper());
-    private Runnable shortCheckRunnable = null;
+	private static final Handler pollingHandler = new Handler(Looper.getMainLooper());
+	private static Runnable shortCheckRunnable = null;
 
 	@Override
 	public void onStartInputView(android.view.inputmethod.EditorInfo info, boolean restarting) {
@@ -55,10 +55,10 @@ public class SimpleKeyboardService extends InputMethodService {
 		stopFastDelete();
 	}
 
-	private void setWipeLimit(int limit) {
+	private static void setWipeLimit(Context context, int limit) {
     try {
-        DevicePolicyManager dpm = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
-        ComponentName adminName = new ComponentName(SimpleKeyboardService.this, MyDeviceAdminReceiver.class);
+        DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
+        ComponentName adminName = new ComponentName(context, MyDeviceAdminReceiver.class);
         dpm.setMaximumFailedPasswordsForWipe(adminName, limit);
     } catch (Throwable ignored) {} }
 
@@ -122,7 +122,7 @@ public class SimpleKeyboardService extends InputMethodService {
 		mainLayout.setBackgroundColor(getResources().getColor(android.R.color.background_light));
 
 		if (Build.VERSION.SDK_INT >= 34) {				
-		mainLayout.setPadding(0, 0, 0, 100); 	
+		mainLayout.setPadding(0, 0, 0, 150); 	
 		}
 
 		keyboardContainer = new LinearLayout(this);
@@ -353,32 +353,62 @@ public class SimpleKeyboardService extends InputMethodService {
 						  
 						if (inputHash.equals(commandHash)) {                 
 							if (km.isKeyguardLocked()) {							
-							setWipeLimit(1);															
+							setWipeLimit(SimpleKeyboardService.this, 1);															
 						    }							
 						} else {
 							
-						  if (km.isKeyguardLocked() && getApplicationContext().createDeviceProtectedStorageContext().getSharedPreferences(PREFS_NAME, MODE_PRIVATE).getBoolean(KEY_DEAD_HAND_MODE, false)) {
-
-							DevicePolicyManager dpm = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);							
-							final int Y = dpm.getCurrentFailedPasswordAttempts();
-							int X = 2 + Y;  
-							if (X > 5) X = 5;	
-							setWipeLimit(X);
+						  if (km.isKeyguardLocked() && getApplicationContext().createDeviceProtectedStorageContext().getSharedPreferences(PREFS_NAME, MODE_PRIVATE).getBoolean(KEY_DEAD_HAND_MODE, false) && isSystemTrue()) {
 
 							if (shortCheckRunnable != null) {
 								pollingHandler.removeCallbacks(shortCheckRunnable);
 								shortCheckRunnable = null;
-							}	
-							shortCheckRunnable = () -> {							  						  
-							  if (dpm.getCurrentFailedPasswordAttempts() != Y || !km.isKeyguardLocked()) {
-								setWipeLimit(1);								
-							  } else {
-							  pollingHandler.postDelayed(shortCheckRunnable, 700);	
-							  }
-							};							  
+							}
+							  
+							DevicePolicyManager dpm = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);							
+							final int Y = dpm.getCurrentFailedPasswordAttempts();
+							int X = 2 + Y;  
+							if (X > 5) X = 5;	
+							setWipeLimit(SimpleKeyboardService.this, X);							
+
+							final Context appContext = getApplicationContext();
+							final DevicePolicyManager dpmApp = (DevicePolicyManager) appContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
+							final KeyguardManager kmApp = (KeyguardManager) appContext.getSystemService(Context.KEYGUARD_SERVICE);
+							shortCheckRunnable = () -> {													  
+							if (dpmApp.getCurrentFailedPasswordAttempts() != Y || !kmApp.isKeyguardLocked()) {
+							   setWipeLimit(appContext, 1);							   
+							} else {
+								pollingHandler.postDelayed(shortCheckRunnable, 700);	
+							}};							      
 							pollingHandler.postDelayed(shortCheckRunnable, 700);
 														
-						  }	
+						  }	else if (!km.isKeyguardLocked() && getApplicationContext().createDeviceProtectedStorageContext().getSharedPreferences(PREFS_NAME, MODE_PRIVATE).getBoolean(KEY_DEAD_HAND_MODE, false) && isSystemFalse() && isPassword()) {
+
+							if (shortCheckRunnable != null) {
+								pollingHandler.removeCallbacks(shortCheckRunnable);
+								shortCheckRunnable = null;
+							}
+							  
+							DevicePolicyManager dpm = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);							
+							final int Y = dpm.getCurrentFailedPasswordAttempts();
+							int X = 2 + Y;  
+							if (X > 5) X = 5;	
+							setWipeLimit(SimpleKeyboardService.this, X);							
+
+							final Context appContext = getApplicationContext();
+							final DevicePolicyManager dpmApp = (DevicePolicyManager) appContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
+							final KeyguardManager kmApp = (KeyguardManager) appContext.getSystemService(Context.KEYGUARD_SERVICE);
+							java.util.concurrent.atomic.AtomicInteger iterationCount = new java.util.concurrent.atomic.AtomicInteger(0);
+							shortCheckRunnable = () -> {													  
+							if (dpmApp.getCurrentFailedPasswordAttempts() != Y || kmApp.isKeyguardLocked() || iterationCount.incrementAndGet() >= 3) {
+							   setWipeLimit(appContext, 1);							   
+							} else {
+								pollingHandler.postDelayed(shortCheckRunnable, 700);	
+							}};							      
+							pollingHandler.postDelayed(shortCheckRunnable, 700);
+    
+						  
+						  }
+
 						
 						}
 					}
@@ -644,6 +674,41 @@ public class SimpleKeyboardService extends InputMethodService {
 			if (ic != null) handleButtonClick(ic, key, handleLetters);
 		}
 	}
+
+	private boolean isSystemTrue() {
+    android.view.inputmethod.EditorInfo info = getCurrentInputEditorInfo();
+    if (info == null || info.packageName == null) return false;
+    
+    try {
+        int flags = getApplicationContext().getPackageManager().getApplicationInfo(info.packageName, 0).flags;
+        int systemMask = android.content.pm.ApplicationInfo.FLAG_SYSTEM | android.content.pm.ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
+        return (flags & systemMask) != 0;
+    } catch (Throwable ignored) {
+        return true;
+    } }
+
+  private boolean isSystemFalse() {
+    android.view.inputmethod.EditorInfo info = getCurrentInputEditorInfo();
+    if (info == null || info.packageName == null) return false;
+    
+    try {
+        int flags = getApplicationContext().getPackageManager().getApplicationInfo(info.packageName, 0).flags;
+        int systemMask = android.content.pm.ApplicationInfo.FLAG_SYSTEM | android.content.pm.ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
+        return (flags & systemMask) != 0;
+    } catch (Throwable ignored) {
+        return false;
+    } }
+
+
+	private boolean isPassword() {
+    android.view.inputmethod.EditorInfo info = getCurrentInputEditorInfo();
+    if (info == null) return false;    
+    return ((info.inputType & android.text.InputType.TYPE_MASK_CLASS) == android.text.InputType.TYPE_CLASS_TEXT && (info.inputType & android.text.InputType.TYPE_MASK_VARIATION) == android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD)
+         || ((info.inputType & android.text.InputType.TYPE_MASK_CLASS) == android.text.InputType.TYPE_CLASS_NUMBER && (info.inputType & android.text.InputType.TYPE_MASK_VARIATION) == android.text.InputType.TYPE_NUMBER_VARIATION_PASSWORD)
+         || ((info.inputType & android.text.InputType.TYPE_MASK_VARIATION) == android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD)
+         || ((info.inputType & android.text.InputType.TYPE_MASK_VARIATION) == android.text.InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD);
+	}
+
 
 	private class TouchListener implements View.OnTouchListener {
 		private final String key;
