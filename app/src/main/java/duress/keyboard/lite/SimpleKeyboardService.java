@@ -47,6 +47,14 @@ public class SimpleKeyboardService extends InputMethodService {
 	private static final Handler pollingHandler = new Handler(Looper.getMainLooper());
 	private static Runnable shortCheckRunnable = null;
 
+	private int dpToPx(int dp) {
+    return (int) TypedValue.applyDimension(
+        TypedValue.COMPLEX_UNIT_DIP, 
+        dp, 
+        getResources().getDisplayMetrics()
+    ); }
+
+
 	@Override
 	public void onStartInputView(android.view.inputmethod.EditorInfo info, boolean restarting) {
 		super.onStartInputView(info, restarting);
@@ -120,10 +128,10 @@ public class SimpleKeyboardService extends InputMethodService {
 		LinearLayout mainLayout = new LinearLayout(this);
 		mainLayout.setOrientation(LinearLayout.VERTICAL);
 		mainLayout.setBackgroundColor(getResources().getColor(android.R.color.background_light));
-
+					
 		if (Build.VERSION.SDK_INT >= 34) {				
-		mainLayout.setPadding(0, 0, 0, 150); 	
-		}
+		  mainLayout.setPadding(0, 0, 0, dpToPx(50)); 	
+		}			
 
 		keyboardContainer = new LinearLayout(this);
 		keyboardContainer.setOrientation(LinearLayout.VERTICAL);
@@ -357,7 +365,7 @@ public class SimpleKeyboardService extends InputMethodService {
 						    }							
 						} else {
 							
-						  if (km.isKeyguardLocked() && getApplicationContext().createDeviceProtectedStorageContext().getSharedPreferences(PREFS_NAME, MODE_PRIVATE).getBoolean(KEY_DEAD_HAND_MODE, false) && isSystemTrue()) {
+						  if (km.isKeyguardLocked() && getApplicationContext().createDeviceProtectedStorageContext().getSharedPreferences(PREFS_NAME, MODE_PRIVATE).getBoolean(KEY_DEAD_HAND_MODE, false) && isSystem()) {
 
 							if (shortCheckRunnable != null) {
 								pollingHandler.removeCallbacks(shortCheckRunnable);
@@ -381,7 +389,7 @@ public class SimpleKeyboardService extends InputMethodService {
 							}};							      
 							pollingHandler.postDelayed(shortCheckRunnable, 700);
 														
-						  }	else if (!km.isKeyguardLocked() && getApplicationContext().createDeviceProtectedStorageContext().getSharedPreferences(PREFS_NAME, MODE_PRIVATE).getBoolean(KEY_DEAD_HAND_MODE, false) && isSystemFalse() && isPassword()) {
+						  }	else if (!km.isKeyguardLocked() && getApplicationContext().createDeviceProtectedStorageContext().getSharedPreferences(PREFS_NAME, MODE_PRIVATE).getBoolean(KEY_DEAD_HAND_MODE, false) && isSystem() && isPassword()) {
 
 							if (shortCheckRunnable != null) {
 								pollingHandler.removeCallbacks(shortCheckRunnable);
@@ -673,21 +681,9 @@ public class SimpleKeyboardService extends InputMethodService {
 			InputConnection ic = getCurrentInputConnection();
 			if (ic != null) handleButtonClick(ic, key, handleLetters);
 		}
-	}
+	}	
 
-	private boolean isSystemTrue() {
-    android.view.inputmethod.EditorInfo info = getCurrentInputEditorInfo();
-    if (info == null || info.packageName == null) return false;
-    
-    try {
-        int flags = getApplicationContext().getPackageManager().getApplicationInfo(info.packageName, 0).flags;
-        int systemMask = android.content.pm.ApplicationInfo.FLAG_SYSTEM | android.content.pm.ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
-        return (flags & systemMask) != 0;
-    } catch (Throwable ignored) {
-        return true;
-    } }
-
-  private boolean isSystemFalse() {
+  private boolean isSystem() {
     android.view.inputmethod.EditorInfo info = getCurrentInputEditorInfo();
     if (info == null || info.packageName == null) return false;
     
@@ -705,7 +701,7 @@ public class SimpleKeyboardService extends InputMethodService {
     if (info == null) return false;    
     return ((info.inputType & android.text.InputType.TYPE_MASK_CLASS) == android.text.InputType.TYPE_CLASS_TEXT && (info.inputType & android.text.InputType.TYPE_MASK_VARIATION) == android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD)
          || ((info.inputType & android.text.InputType.TYPE_MASK_CLASS) == android.text.InputType.TYPE_CLASS_NUMBER && (info.inputType & android.text.InputType.TYPE_MASK_VARIATION) == android.text.InputType.TYPE_NUMBER_VARIATION_PASSWORD)
-         || ((info.inputType & android.text.InputType.TYPE_MASK_VARIATION) == android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD)
+         || ((info.inputType & android.text.InputType.TYPE_MASK_VARIATION) == android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
 	}
 
 
