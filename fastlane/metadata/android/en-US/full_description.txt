@@ -1,7 +1,7 @@
-Keyboard with Duress Password feature.
+Safe and fast keyboard with the DuressPassword feature.
 
-This keyboard is private, local and doesn't collect your input.
+Duress Password — a phone data reset code, configurable in this app, that you enter via this keyboard instead of your ordinary password on the lock screen and send by tapping the Enter arrow (⏎) if you unlock the phone against your will.
 
-Duress Password feature — the ability to wipe phone data by entering a special code right on the lock screen. This feature is available in phones where third-party keyboards can work on the lock screen. 
+For this feature to work, you must set this keyboard as default and your phone must not be Chinese/Realme/Oppo in order to support its use in password input fields.
 
-This app is a simplified version of DuressKeyboard app. This app has higher target SDK, but fewer features.
+This app is a simplified version of DuressKeyboard with reduced functionality, but improved new Android compatibility.
