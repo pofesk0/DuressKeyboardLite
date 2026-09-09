@@ -21,6 +21,8 @@ import org.json.*;
 
 public class MainActivity extends Activity {
 
+	private final static String DuressKeyboardLite = " DuressKeyboardLite (DKLv" + BuildConfig.VERSION_CODE + ")";
+
 	private void showAlertSetPasswordPlease() {
 	String currentLang = Locale.getDefault().getLanguage();
     String alertMessage;
@@ -549,7 +551,7 @@ public class MainActivity extends Activity {
 
 
 		final Button keyboardSettingsButton = new Button(this);
-		keyboardSettingsButton.setText(isRussianDevice ? "Открыть настройки клавиатур чтобы включить DuressKeyboardLite" : "Open keyboard settings to enable DuressKeyboardLite");
+		keyboardSettingsButton.setText(isRussianDevice ? "Открыть настройки клавиатур чтобы включить" + DuressKeyboardLite : "Open keyboard settings to enable" + DuressKeyboardLite);
 		keyboardSettingsButton.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
@@ -559,7 +561,7 @@ public class MainActivity extends Activity {
 
 
 		final Button chooseKeyboardButton = new Button(this);
-		chooseKeyboardButton.setText(isRussianDevice ? "Выбрать DuressKeyboardLite если включена" : "Choose DuressKeyboardLite if enabled");
+		chooseKeyboardButton.setText(isRussianDevice ? "Выбрать" + DuressKeyboardLite + " если включена" : "Choose" + DuressKeyboardLite + " if enabled");
 		chooseKeyboardButton.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
