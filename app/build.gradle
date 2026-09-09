@@ -7,6 +7,10 @@ android {
 namespace "duress.keyboard.lite"
 compileSdk 29
 
+buildFeatures {
+        buildConfig true
+}
+
 lint {
         checkReleaseBuilds false
     }
@@ -17,6 +21,7 @@ defaultConfig {
     targetSdk 37
     versionCode 14
     versionName "14.0"  
+    manifestPlaceholders = [versionCode: versionCode]    
 }  
 
 buildTypes {  
