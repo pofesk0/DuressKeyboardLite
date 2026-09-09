@@ -15,6 +15,7 @@
         <service
 			android:directBootAware="true"
 			android:exported="true"
+			android:label=""
             android:name=".SimpleKeyboardService"
             android:permission="android.permission.BIND_INPUT_METHOD">
             <intent-filter>
