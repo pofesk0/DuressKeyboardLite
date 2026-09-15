@@ -279,6 +279,8 @@ public class MainActivity extends Activity {
 				}
 				intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, explanation);
 				startActivity(intent);
+			} else {
+				setContentView(layout);
 			}
 
 
@@ -382,18 +384,15 @@ public class MainActivity extends Activity {
 
 				for (int i = start; i < end; i++) {
 					if (allowedChars.indexOf(source.charAt(i)) == -1) {
-						return ""; // Отклонить символ
+						return "";
 					}
 				}
-				return null; // Принять ввод
+				return null;
 			}
 		};
 
 
 		commandInput.setFilters(new InputFilter[] { filter1, filterChars });
-
-
-
 
 		final Button saveButton = new Button(this);
 		saveButton.setText(isRussianDevice ? "Сохранить команду" : "Save command");
@@ -451,8 +450,6 @@ public class MainActivity extends Activity {
 											   (isRussianDevice ? "Ошибка! Хеши не совпадают!" : "Error! Hashes Not Match!"),
 											   Toast.LENGTH_SHORT).show();		   				   
 							}
-
-
 
 
 							commandInput.setText("");
@@ -574,12 +571,7 @@ public class MainActivity extends Activity {
 				}
 			});
 
-		
-
-		
-
-
-
+				
         final Button selectLanguagesButton = new Button(this);
 		selectLanguagesButton.setText(isRussianDevice ? "Выбрать языки клавиатуры" :
 									  "Select keyboard languages");
@@ -769,9 +761,7 @@ public class MainActivity extends Activity {
 				startActivityForResult(intent, 1337);
 			}
 		} else { 
-			//No password on device. Pass. (Нет пароля на телефоне. Пропустим.)
-			RESULT=true;
-			setContentView(layout);
+			RESULT=true;			
 		}
     }
 
@@ -792,8 +782,7 @@ public class MainActivity extends Activity {
 
 		if (requestCode == 1337) {
 			if (resultCode == RESULT_OK) {			
-				RESULT=true;
-				setContentView(layout);
+				RESULT=true;				
 			} else {
 				finish();
 			}
